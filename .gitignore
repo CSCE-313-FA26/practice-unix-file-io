@@ -1,0 +1,15 @@
+# Compiled programs. `make` rebuilds them; they are named after their source.
+[0-9][0-9]-*
+!*.c
+
+# Anything the demos leave behind
+right.txt
+wrong.txt
+foobar.txt
+tiny.txt
+big.txt
+seekme.txt
+redirected.txt
+copy.txt
+*.o
+core

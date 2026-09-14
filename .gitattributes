@@ -1,0 +1,5 @@
+# These are built and run on Linux. A CRLF in run-all.sh makes the shebang
+# fail with a confusing "not found", and a CRLF in the Makefile breaks tabs.
+*.c        text eol=lf
+*.sh       text eol=lf
+Makefile   text eol=lf
