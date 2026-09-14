@@ -6,6 +6,8 @@
  * state the kernel is holding for you.
  *
  * Two reads of 2 bytes give "fo" then "ob". Not "fo" then "foob".
+ *
+ * Demo 05 is this same picture with the arrow turned around: two writes.
  */
 #include <stdio.h>
 #include <fcntl.h>

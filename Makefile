@@ -15,7 +15,7 @@ CFLAGS  = -std=c11 -g -Wall -Wextra -D_GNU_SOURCE
 SRCS    = $(wildcard [0-9]*.c)
 PROGS   = $(SRCS:.c=)
 
-# Bonus demos, kept out of the 15-minute set. Built into extra/ by `make extra`.
+# Demos that did not earn a slot in the walk. Built into extra/ by `make extra`.
 XSRCS   = $(wildcard extra/[0-9]*.c)
 XPROGS  = $(XSRCS:.c=)
 
@@ -31,8 +31,8 @@ demo: all
 
 clean:
 	rm -f $(PROGS) $(XPROGS)
-	rm -f right.txt wrong.txt foobar.txt tiny.txt big.txt seekme.txt \
-	      redirected.txt copy.txt
+	rm -f right.txt wrong.txt foobar.txt abab.txt big.txt tiny.txt \
+	      seekme.txt redirected.txt copy.txt
 
 list:
 	@printf '%s\n' $(PROGS)

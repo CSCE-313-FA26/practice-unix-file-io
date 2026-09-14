@@ -1,36 +1,62 @@
 /* 02 - the descriptor table, printed.
  *
+ * Demo 01 printed the slot numbers. This prints the table they index into.
+ *
  * /proc/self/fd is a directory the kernel invents on demand: one symlink per
  * open descriptor, named after the slot number, pointing at whatever that slot
- * currently refers to. It is the left-hand box from the slides, and you can
- * just look at it.
+ * currently refers to. Watch a row appear when open() runs and vanish when
+ * close() runs, leaving the gap that open() will reuse next.
  *
- * Two things to notice while it is on screen:
+ * 0, 1 and 2 are ordinary rows in it. They point at your terminal (/dev/pts/N)
+ * only because the shell filled them in before this program started - run this
+ * with `| cat` and watch slot 1 turn into a pipe.
  *
- *   - 0, 1 and 2 point at your terminal (/dev/pts/N). They are not special.
- *     They are slots the shell filled in before this program started. Run this
- *     with `| cat` and they turn into pipes.
- *   - /proc itself is not on any disk. The kernel is exposing its own data
- *     structures as files, because on Unix everything is a file.
- *
- * Demos 06 and 07 change this table. Come back here after each of them.
+ * (/proc is not on any disk. It is the kernel showing you its own data
+ * structures as files, which is the "even the kernel is a file" line from
+ * earlier in the deck, made literal.)
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+static int ascending(const void *a, const void *b)
+{
+    return *(const int *)a - *(const int *)b;
+}
 
 static void show_table(const char *when)
 {
     printf("\n--- descriptor table %s ---\n", when);
-    fflush(stdout);
-    /* ls runs in a forked child, which INHERITS this table - that is why it
-       can see our descriptors at all. It also opens the directory it is
-       reading, which lands in whatever slot is free and would look like one
-       of ours, so that row is filtered out below. */
-    if (system("ls -l /proc/self/fd"
-               " | grep -v '^total'"
-               " | grep -v '/proc/[0-9]*/fd'") == -1) perror("system");
+
+    DIR *d = opendir("/proc/self/fd");
+    if (!d) { perror("opendir"); return; }
+
+    /* Reading the table needs a descriptor of its own, and it lands in a free
+       slot like anything else. It is an artifact of looking, not part of what
+       we are looking at, so leave it out. */
+    int looking = dirfd(d);
+
+    int fds[64];
+    int n = 0;
+    struct dirent *e;
+    while ((e = readdir(d)) != NULL && n < (int)(sizeof fds / sizeof fds[0])) {
+        if (e->d_name[0] == '.') continue;       /* "." and ".." */
+        int fd = atoi(e->d_name);
+        if (fd != looking) fds[n++] = fd;
+    }
+    qsort(fds, (size_t)n, sizeof fds[0], ascending);
+
+    for (int i = 0; i < n; i++) {
+        char link[64], target[256];
+        snprintf(link, sizeof link, "/proc/self/fd/%d", fds[i]);
+        ssize_t len = readlink(link, target, sizeof target - 1);
+        if (len < 0) { perror("readlink"); continue; }
+        target[len] = '\0';
+        printf("   %d -> %s\n", fds[i], target);
+    }
+    closedir(d);
 }
 
 int main(void)

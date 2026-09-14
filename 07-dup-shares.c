@@ -1,4 +1,8 @@
-/* 08 - dup() copies the ARROW, not the session. And that is how `>` works.
+/* 07 - dup() copies the ARROW, not the session. And that is how `>` works.
+ *
+ * One step past the end of the deck. Slide 22 leaves you holding two cursors
+ * and a refcnt of 1 each; the obvious next question is what a refcnt above 1
+ * would even look like, and the answer is the whole mechanism behind `>`.
  *
  * Demo 06: two open()s -> two file-table entries -> two cursors.
  * Demo 07: one open() and a dup() -> two descriptor slots pointing at ONE
