@@ -1,0 +1,103 @@
+
+[1m=== 01-fd-numbers ===[0m
+first  open  -> fd 3    (0,1,2 were already taken)
+second open  -> fd 4    same file, different slot
+close(3)
+third  open  -> fd 3    <- the freed slot came back, not 5
+
+open("/no/such/file") -> -1
+
+fd == -1 is the only error check open() gives you. Use it every
+time; a bad fd does not announce itself until the read() fails.
+
+[1m=== 02-the-table ===[0m
+
+--- descriptor table at startup ---
+   0 -> /dev/pts/3
+   1 -> /home/phyqh/practice-unix-file-io/output.txt
+   2 -> /dev/pts/3
+
+opened /etc/hosts twice -> fds 3 and 4
+
+--- descriptor table after two open()s ---
+   0 -> /dev/pts/3
+   1 -> /home/phyqh/practice-unix-file-io/output.txt
+   2 -> /dev/pts/3
+   3 -> /etc/hosts
+   4 -> /etc/hosts
+
+close(3)
+
+--- descriptor table after one close() ---
+   0 -> /dev/pts/3
+   1 -> /home/phyqh/practice-unix-file-io/output.txt
+   2 -> /dev/pts/3
+   4 -> /etc/hosts
+
+A descriptor is a row in that table. open() adds one, close()
+removes one, and the integer you hold is just the row number.
+
+[1m=== 03-permissions ===[0m
+asked for 0700 and for 700:
+  right.txt   mode = 0700
+  wrong.txt   mode = 1274
+
+700 decimal == 01274 octal. The bits land in the wrong columns.
+Look at the difference:
+
+-rwx------ 1 phyqh phyqh 0 Sep 16 20:16 right.txt
+--w-rwxr-T 1 phyqh phyqh 0 Sep 16 20:16 wrong.txt
+
+Permissions are always octal. Write the leading zero, or use the
+named constants: S_IRWXU, S_IRUSR | S_IWUSR, and so on.
+
+[1m=== 04-cursor ===[0m
+read #1 -> 2 byte(s), buf = "fo", cursor is now at 2
+read #2 -> 2 byte(s), buf = "ob", cursor is now at 4
+read #3 -> 2 byte(s), buf = "ar", cursor is now at 6
+read #4 -> 0 byte(s), buf = "", cursor is now at 6
+
+The last read returned 0. That is end of file, and it is not an
+error - errors are negative. 0 is how every read loop knows to stop.
+
+[1m=== 05-write-twice ===[0m
+write #1 -> 2 byte(s), cursor is now at 2
+write #2 -> 2 byte(s), cursor is now at 4
+abab.txt now contains "abab"  <- not "ab". The second write did
+not start over; it started where the first one stopped.
+
+sizeof(char buf[] = {'a','b'}) = 2   <- the array, 2 bytes
+sizeof(char *ptr  = "ab")      = 8   <- the POINTER, not the text
+The second form hands write() an 8 and it will happily read 8 bytes
+out of a 3-byte object. Use strlen(), or write the array.
+
+[1m=== 06-two-opens ===[0m
+opened the same file twice: fd1 = 3, fd2 = 4
+
+read(fd1) -> 'f'   fd1 cursor 1, fd2 cursor 0
+read(fd2) -> 'f'   <- 'f' again. fd2 never moved.
+read(fd1) -> 'o'   fd1 is at 2 while fd2 is at 1
+
+One file on disk, one v-node, two file-table entries, two cursors.
+Every open() gets its own place in the file.
+
+[1m=== 07-dup-shares ===[0m
+fd1 = 3, fd2 = dup(fd1) = 4
+
+read(fd1) -> 'f'
+read(fd2) -> 'o'   <- 'o', not 'f'. Compare demo 06.
+both report cursor 2 - it is the same cursor
+
+--- about to redirect stdout ---
+--- stdout restored ---
+redirected.txt contains: this printf never reached the terminal
+
+printf() never knew. It writes to fd 1 and the kernel decides what
+fd 1 means. That indirection is the whole point of a descriptor.
+
+[1m=== 09-fifo ===[0m
+
+[1m=== 08-mini-cat foobar.txt ===[0m
+foobar
+
+[1m=== 08-mini-cat big.txt > copy.txt   (the same program is cp) ===[0m
