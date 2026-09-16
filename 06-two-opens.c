@@ -1,4 +1,4 @@
-/* 07 - two open()s of the same file are two independent sessions.
+/* 06 - two open()s of the same file are two independent sessions.
  *
  * This is the three-table picture from the slides, made visible. Each open()
  * creates its own entry in the shared file table, and the cursor lives in that

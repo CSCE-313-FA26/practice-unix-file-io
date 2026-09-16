@@ -1,7 +1,7 @@
-/* 10 - put it together: cat, and therefore cp, in about twenty lines.
+/* 08 - put it together: cat, and therefore cp, in about twenty lines.
  *
- *     ./10-mini-cat foobar.txt              behaves like cat
- *     ./10-mini-cat foobar.txt > copy.txt   behaves like cp
+ *     ./08-mini-cat foobar.txt              behaves like cat
+ *     ./08-mini-cat foobar.txt > copy.txt   behaves like cp
  *
  * Nothing new here - open, a read loop that stops at 0, a write loop that
  * survives short counts, close. That loop is every file copy, every network

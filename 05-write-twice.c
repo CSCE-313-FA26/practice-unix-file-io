@@ -48,15 +48,14 @@ int main(void)
     printf("The second form hands write() an 8 and it will happily read 8 bytes\n"
            "out of a 3-byte object. Use strlen(), or write the array.\n");
 
-    /* Same deal as read(): the return value is the truth, not your request. */
+    /* Scratch file for demo 08, not a lesson. It only has to be bigger than
+       08's read buffer so that its loop is forced to go round more than once. */
     char blob[BIG];
     for (int i = 0; i < BIG; i++) blob[i] = 'a' + (i % 26);
     fd = open("big.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    ssize_t w = write(fd, blob, BIG);
+    if (write(fd, blob, BIG) != BIG) perror("write");
     close(fd);
-    printf("\nasked write() for %d bytes -> it took %zd\n", BIG, w);
-    printf("To a regular file it usually takes all of them. To a pipe, a socket\n"
-           "or a terminal it often takes fewer, and that is not an error either.\n"
-           "So a write is a loop, same as a read. Demo 08 has the loop.\n");
+    printf("\n(also wrote big.txt, %d bytes - demo 08 needs something to copy)\n",
+           BIG);
     return 0;
 }
