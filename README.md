@@ -29,15 +29,3 @@ says `Permission denied`, the script lost its execute bit in transit:
 | 05 | `write-twice` | The "abab" slide: the same two bytes written twice give `abab`. `write()` moves that same cursor. Plus the `sizeof` trap the slide raises | 17, 18 |
 | 06 | `two-opens` | Two `open()`s → two file-table entries → two independent cursors. Both read `f` | 19–22 |
 | 07 | `dup-shares` | `dup()` → two descriptors, **one** file-table entry, one shared cursor. Then `dup2(fd, 1)`: redirection by hand | past 22 |
-| 08 | `mini-cat` | open + read loop + write loop + close. A working `cat`, and with `>` a working `cp` | — |
-
-The slide column only moves forward, so you can walk the deck and the terminal
-at the same pace. 07 goes one step past the end: the deck never says `dup`, but
-it ends holding two cursors, which makes "what would a *shared* one look like?"
-the next question — and the answer is how `>` works.
-
-## extra/
-
-`make extra` builds four more that did not fit the class budget:
-`02-three-standard-files`, `05-read-loop`, `06-lseek`,
-`09-buffer-vs-syscall`.

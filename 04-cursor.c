@@ -29,6 +29,7 @@ int main(void)
     if (fd < 0) { perror("open"); return 1; }
 
     char buf[3];              /* 2 bytes plus room for a terminator */
+    // printf("cursor is now at %ld\n", (long)lseek(fd, 0, SEEK_CUR));
     for (int i = 1; i <= 4; i++) {
         ssize_t n = read(fd, buf, 2);
         if (n < 0) { perror("read"); return 1; }

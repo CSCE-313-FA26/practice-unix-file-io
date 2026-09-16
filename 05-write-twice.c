@@ -12,8 +12,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define BIG 5000
-
 int main(void)
 {
     /* Slide 18, verbatim. */
@@ -47,15 +45,5 @@ int main(void)
            sizeof ptr);
     printf("The second form hands write() an 8 and it will happily read 8 bytes\n"
            "out of a 3-byte object. Use strlen(), or write the array.\n");
-
-    /* Scratch file for demo 08, not a lesson. It only has to be bigger than
-       08's read buffer so that its loop is forced to go round more than once. */
-    char blob[BIG];
-    for (int i = 0; i < BIG; i++) blob[i] = 'a' + (i % 26);
-    fd = open("big.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (write(fd, blob, BIG) != BIG) perror("write");
-    close(fd);
-    printf("\n(also wrote big.txt, %d bytes - demo 08 needs something to copy)\n",
-           BIG);
     return 0;
 }
